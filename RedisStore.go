@@ -9,7 +9,7 @@ import (
 
 const SS_PREFIX = "ss:"
 var StoragePtr *Storage
-type User struct {
+type redisUser struct {
 	Name     string
 	Password string
 
@@ -46,13 +46,13 @@ func (s *Storage) Del(key string) (err error) {
 	
 	 
 }
-func (s *Storage) Get(key string) (user User, err error) {
+func (s *Storage) Get(key string) (user redisUser, err error) {
 	fullkey := SS_PREFIX + key
 
 	return s.get(fullkey)
 }
 
-func (s *Storage) get(fullkey string) (user User, err error) {
+func (s *Storage) get(fullkey string) (user redisUser, err error) {
 	var data []byte
 	var conn = s.pool.Get()
 	defer conn.Close()
@@ -64,7 +64,7 @@ func (s *Storage) get(fullkey string) (user User, err error) {
 	return
 }
 
-func (s *Storage) GetList() (userList []User, err error) {
+func (s *Storage) GetList() (userList []redisUser, err error) {
 	//var data []byte
 	var conn = s.pool.Get()
 	defer conn.Close()
@@ -76,7 +76,7 @@ func (s *Storage) GetList() (userList []User, err error) {
 		return
 	}
 
-	userList = make([]User, len(data))
+	userList = make([]redisUser, len(data))
 	for k, v := range data {
 		_user, _ := s.get(v)
 		userList[k] = _user
@@ -84,7 +84,7 @@ func (s *Storage) GetList() (userList []User, err error) {
 
 	return
 }
-func (s *Storage) Set(key string, user User) (err error) {
+func (s *Storage) Set(key string, user redisUser) (err error) {
 	data, err := json.Marshal(user)
 	if err != nil {
 		return err

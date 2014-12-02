@@ -5,10 +5,11 @@ import (
 	"strings"
 	"strconv"
 )
+
 var (
 	lowerRe, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
-	brRe, _ = regexp.Compile("<br.*?>")
-	tagRe, _ = regexp.Compile("<.*?>")
+	brRe, _    = regexp.Compile("<br.*?>")
+	tagRe, _   = regexp.Compile("<.*?>")
 )
 
 func StripTags(html string) string {
@@ -20,11 +21,11 @@ func StripTags(html string) string {
 	html = tagRe.ReplaceAllString(html, "")
 	return html
 }
+
 // Simplify HTML text by removing tags
 func RemoveFormatting(html string) string {
 	return StripTags(html)
 }
-
 
 //Html过滤
 func Html2str(html string) string {
@@ -69,9 +70,9 @@ func substr(str string, start, length int, isRune bool) string {
 	}
 	end := 0
 	if start < 0 {
-		start = rl - 1 + start
+		start = rl-1+start
 	}
-	end = start + length
+	end = start+length
 	if start > end {
 		start, end = end, start
 	}
@@ -103,6 +104,7 @@ func ListContains(list []interface{}, key interface{}) (finded bool) {
 	}
 	return
 }
+
 //字符串数组中是否包含给定项
 func StringsContains(list []string, key string) (finded bool) {
 	for _, v := range list {
@@ -131,16 +133,16 @@ func StringEqual(a, b []string) bool {
 func Str2int64(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
+
 //字符串转整形
 func Str2int(s string) (int, error) {
 	return strconv.Atoi(s)
 }
+
 //整形转字符串
 func Int2str(i int) string {
 	return strconv.Itoa(i)
 }
-
-
 
 // convert like this: "HelloWorld" to "hello_world"
 func SnakeCasedName(name string) string {
@@ -153,9 +155,20 @@ func SnakeCasedName(name string) string {
 			} else {
 				newstr = append(newstr, '_')
 			}
-			chr -= ('A' - 'a')
+			chr -= ('A'-'a')
 		}
 		newstr = append(newstr, chr)
 	}
 	return string(newstr)
 }
+
+//将数组转换为字符串，英文逗号分隔
+func Array2String(array []string) string {
+	item := ""
+	for _, v := range array {
+		item+=v+","
+	}
+	item = item[:len(item)-1]
+	return item
+}
+

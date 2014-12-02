@@ -9,7 +9,6 @@ import (
 	"reflect"
 )
 
-
 // map & struct convert is from https://github.com/sdegutis/go.mapstruct
 // convert map to struct
 func MapToStruct(m map[string]interface{}, s interface{}) {
@@ -19,6 +18,7 @@ func MapToStruct(m map[string]interface{}, s interface{}) {
 		v.Field(i).Set(reflect.ValueOf(m[key]))
 	}
 }
+
 // convert struct to map
 // s must to be struct, can not be a pointer
 func rawStructToMap(s interface{}, snakeCasedKey bool) map[string]interface{} {
@@ -40,15 +40,18 @@ func rawStructToMap(s interface{}, snakeCasedKey bool) map[string]interface{} {
 	}
 	return m
 }
+
 // convert struct to map
 func StructToMap(s interface{}) map[string]interface{} {
 	return rawStructToMap(s, false)
 }
+
 // convert struct to map
 // but struct's field name to snake cased map key
 func StructToSnakeKeyMap(s interface{}) map[string]interface{} {
 	return rawStructToMap(s, true)
 }
+
 // get the Struct's name
 func StructName(s interface{}) string {
 	v := reflect.TypeOf(s)
@@ -57,6 +60,7 @@ func StructName(s interface{}) string {
 	}
 	return v.Name()
 }
+
 // load json file to a map
 func LoadJsonFile(filePath string) (map[string]interface{}, error) {
 	fi, err := os.Stat(filePath)
@@ -77,6 +81,7 @@ func LoadJsonFile(filePath string) (map[string]interface{}, error) {
 	}
 	return conf, nil
 }
+
 // 获取map的key，返回所有key组成的slice
 func MapKeys(data map[string]interface{}) []string {
 	keys := make([]string, 0, len(data))
@@ -85,6 +90,7 @@ func MapKeys(data map[string]interface{}) []string {
 	}
 	return keys
 }
+
 // 获取map的key，返回所有key组成的slice
 func MapIntKeys(data map[int]int) []int {
 	keys := make([]int, 0, len(data))
@@ -93,3 +99,48 @@ func MapIntKeys(data map[int]int) []int {
 	}
 	return keys
 }
+
+////////////////////////////////////////////////
+//var m1, m2 map[string]interface{}
+//json.Unmarshal(buf1, &m1)
+//json.Unmarshal(buf2, &m2)
+//
+//merged := mergemap.Merge(m1, m2)
+
+
+var (
+	MaxDepth = 32
+)
+// Merge recursively merges the src and dst maps. Key conflicts are resolved by
+// preferring src, or recursively descending, if both src and dst are maps.
+func Merge(dst, src map[string]interface{}) map[string]interface{} {
+	return merge(dst, src, 0)
+}
+func merge(dst, src map[string]interface{}, depth int) map[string]interface{} {
+	if depth > MaxDepth {
+		panic("too deep!")
+	}
+	for key, srcVal := range src {
+		if dstVal, ok := dst[key]; ok {
+			srcMap, srcMapOk := mapify(srcVal)
+			dstMap, dstMapOk := mapify(dstVal)
+			if srcMapOk && dstMapOk {
+				srcVal = merge(dstMap, srcMap, depth+1)
+			}
+		}
+		dst[key] = srcVal
+	}
+	return dst
+}
+func mapify(i interface{}) (map[string]interface{}, bool) {
+	value := reflect.ValueOf(i)
+	if value.Kind() == reflect.Map {
+		m := map[string]interface{}{}
+		for _, k := range value.MapKeys() {
+			m[k.String()] = value.MapIndex(k).Interface()
+		}
+		return m, true
+	}
+	return map[string]interface{}{}, false
+}
+///////////////////////////////////////////////
